@@ -2,15 +2,17 @@
 name: Build and Push to GHCR
 
 on:
-  # 手动触发
   workflow_dispatch:
     inputs:
+      n8n_version:
+        description: 'n8n version (leave empty for latest)'
+        required: false
+        default: ''
       tag:
-        description: 'Image tag (e.g., latest, v1.0.0)'
+        description: 'Image tag'
         required: false
         default: 'latest'
   
-  # 推送到 main 分支时触发
   push:
     branches:
       - main
@@ -18,7 +20,6 @@ on:
       - 'Dockerfile'
       - '.github/workflows/build-and-push.yml'
   
-  # 定时构建（每周一凌晨 3 点，跟随 n8n 更新）
   schedule:
     - cron: '0 3 * * 1'
 
@@ -58,7 +59,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
+            type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '' }}
             type=sha,prefix=
             type=raw,value={{date 'YYYYMMDD'}}
 
