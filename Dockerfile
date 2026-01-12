@@ -15,6 +15,8 @@ RUN apk update && apk add --no-cache \
 # 设置 Puppeteer 环境变量
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    # 添加默认启动参数
+    CHROMIUM_FLAGS="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --disable-gpu --disable-software-rasterizer --disable-extensions" \
     N8N_COMMUNITY_PACKAGES_ENABLED=true \
     NODE_ENV=production
 
@@ -38,13 +40,9 @@ RUN echo '{"name": "n8n-custom-nodes", "version": "1.0.0"}' > package.json && \
 
 WORKDIR /home/node
 
-# 暴露端口
 EXPOSE 5678
 
-# 使用 tini 作为 init 进程
 ENTRYPOINT ["/sbin/tini", "--"]
-
-# 启动 n8n
 CMD ["n8n", "start"]
 
 LABEL org.opencontainers.image.source="https://github.com/OWNER/n8n-puppeteer"
