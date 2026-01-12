@@ -2,19 +2,18 @@ FROM n8nio/n8n:latest
 
 USER root
 
-# 安装 Chromium 和所有必要的系统依赖库
-RUN apk add --no-cache \
-    # Chromium 浏览器
+# 使用完整路径运行 apk，并分步安装以便调试
+RUN /sbin/apk update && \
+    /sbin/apk add --no-cache \
     chromium \
-    # 字体支持
-    font-noto-cjk \
-    ttf-freefont \
-    # 核心库
     nss \
     freetype \
     harfbuzz \
     ca-certificates \
-    # X11 和图形相关
+    ttf-freefont \
+    font-noto-cjk
+
+RUN /sbin/apk add --no-cache \
     libx11 \
     libxcomposite \
     libxdamage \
@@ -22,25 +21,26 @@ RUN apk add --no-cache \
     libxfixes \
     libxrandr \
     libxcb \
-    libxkbcommon \
-    # GTK 和渲染
+    libxkbcommon
+
+RUN /sbin/apk add --no-cache \
     pango \
     cairo \
     gtk+3.0 \
-    # 音频和打印
     alsa-lib \
-    cups-libs \
-    # DBus 和系统服务
+    cups-libs
+
+RUN /sbin/apk add --no-cache \
     dbus-libs \
-    udev \
-    # DRM 和 Mesa
+    eudev-libs \
     libdrm \
     mesa-gbm \
-    # 无障碍支持
+    mesa-gl
+
+RUN /sbin/apk add --no-cache \
     atk \
     at-spi2-core \
     at-spi2-atk \
-    # GLib
     glib
 
 # 设置 Puppeteer 环境变量
