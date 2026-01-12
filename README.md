@@ -32,13 +32,10 @@ services:
       # Puppeteer 设置
       - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
       - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-      # n8n 设置
-      - N8N_COMMUNITY_PACKAGES_ENABLED=true
-      - N8N_REINSTALL_MISSING_PACKAGES=true
     volumes:
       - n8n_data:/home/node/.n8n
     # 给 Chromium 分配共享内存
-    shm_size: '2gb'
+    shm_size: '1gb'
     security_opt:
       - no-new-privileges:true
 
