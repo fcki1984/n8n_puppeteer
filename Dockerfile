@@ -46,7 +46,6 @@ RUN apk add --no-cache \
 # 设置 Puppeteer 环境变量
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    # 允许 n8n 社区节点
     N8N_COMMUNITY_PACKAGES_ENABLED=true
 
 # 创建节点目录并设置权限
@@ -67,3 +66,8 @@ RUN npm init -y && \
 
 # 返回默认工作目录
 WORKDIR /home/node
+
+# 添加标签
+LABEL org.opencontainers.image.source="https://github.com/OWNER/n8n-puppeteer"
+LABEL org.opencontainers.image.description="n8n with Puppeteer support"
+LABEL org.opencontainers.image.licenses="MIT"
