@@ -1,0 +1,2 @@
+# n8n_puppeteer
+为n8n添加chromium依赖库和模块puppeteer
