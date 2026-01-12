@@ -1,6 +1,6 @@
 FROM node:20-alpine
 
-# 安装 Chromium 和依赖 - 使用 Alpine 官方支持的包名
+# 安装 Chromium 和依赖
 RUN apk update && apk add --no-cache \
     chromium \
     nss \
@@ -8,9 +8,7 @@ RUN apk update && apk add --no-cache \
     harfbuzz \
     ca-certificates \
     ttf-freefont \
-    # 中文字体
     font-noto-cjk \
-    # 其他工具
     git \
     tini
 
@@ -23,16 +21,16 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 # 安装 n8n
 RUN npm install -g n8n
 
-# 创建必要目录
-RUN mkdir -p /home/node/.n8n/nodes/node_modules && \
+# 创建必要目录结构
+RUN mkdir -p /home/node/.n8n/nodes && \
     chown -R node:node /home/node/.n8n
 
 # 切换到 node 用户
 USER node
-WORKDIR /home/node/.n8n/nodes/node_modules
 
-# 安装 Puppeteer 社区节点
-RUN npm init -y && \
+# 在 nodes 目录下创建 package.json 并安装节点
+WORKDIR /home/node/.n8n/nodes
+RUN echo '{"name": "n8n-custom-nodes", "version": "1.0.0"}' > package.json && \
     npm install n8n-nodes-puppeteer \
     puppeteer-extra-plugin-user-preferences \
     puppeteer-extra-plugin-stealth \
