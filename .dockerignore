@@ -1,0 +1,7 @@
+# 忽略文件
+.git
+.gitignore
+.github
+*.md
+!README.md
+LICENSE
