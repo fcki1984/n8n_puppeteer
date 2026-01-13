@@ -5,7 +5,6 @@
 
 FROM n8nio/runners:2.4.0-amd64
 
-# 切换到 root 安装系统依赖
 USER root
 
 # 设置环境变量
@@ -14,22 +13,24 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     CHROME_BIN=/usr/bin/chromium-browser \
     CHROMIUM_FLAGS="--no-sandbox --disable-dev-shm-usage"
 
-# 安装 Chromium 及完整依赖（Alpine 使用 apk）
+# 第一步：恢复 apk-tools（n8n 2.x 镜像中被移除了）
+# 注意：Alpine 版本和 apk-tools 版本需要匹配基础镜像
+RUN wget -q https://dl-cdn.alpinelinux.org/alpine/v3.21/main/x86_64/apk-tools-static-2.14.6-r2.apk -O /tmp/apk-tools.apk && \
+    tar -xzf /tmp/apk-tools.apk -C /tmp && \
+    /tmp/sbin/apk.static add --no-cache apk-tools && \
+    rm -rf /tmp/apk-tools.apk /tmp/sbin
+
+# 第二步：安装 Chromium 及完整依赖
 RUN apk update && apk add --no-cache \
-    # Chromium 浏览器
     chromium \
-    # 字体
     font-noto-cjk \
     font-noto-emoji \
     fontconfig \
     freetype \
     ttf-freefont \
-    # Chromium 运行时依赖
     harfbuzz \
     nss \
-    # 其他工具
     ca-certificates \
-    wget \
     && rm -rf /var/cache/apk/*
 
 # 验证 Chromium 安装
@@ -41,12 +42,9 @@ RUN pnpm add puppeteer-core
 
 # 复制 allowlist 配置文件
 COPY n8n-task-runners.json /etc/n8n-task-runners.json
-
-# 确保配置文件权限正确
 RUN chmod 644 /etc/n8n-task-runners.json
 
-# 切换回非 root 用户运行
+# 切换回非 root 用户
 USER runner
 
-# 默认工作目录
 WORKDIR /opt/runners
