@@ -10,48 +10,30 @@ USER root
 
 # 设置环境变量
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
-    CHROME_BIN=/usr/bin/chromium \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    CHROME_BIN=/usr/bin/chromium-browser \
     CHROMIUM_FLAGS="--no-sandbox --disable-dev-shm-usage"
 
-# 安装 Chromium 及完整依赖（字体、GTK、X11 等）
-# n8nio/runners:2.4.0-amd64 基于 Debian
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# 安装 Chromium 及完整依赖（Alpine 使用 apk）
+RUN apk update && apk add --no-cache \
     # Chromium 浏览器
     chromium \
-    # 基础字体
-    fonts-liberation \
-    fonts-noto-color-emoji \
-    fonts-noto-cjk \
-    fonts-freefont-ttf \
+    # 字体
+    font-noto-cjk \
+    font-noto-emoji \
+    fontconfig \
+    freetype \
+    ttf-freefont \
     # Chromium 运行时依赖
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxfixes3 \
-    libxrandr2 \
-    libxshmfence1 \
-    libxss1 \
-    libxtst6 \
-    xdg-utils \
-    # 其他可能需要的工具
+    harfbuzz \
+    nss \
+    # 其他工具
     ca-certificates \
     wget \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+    && rm -rf /var/cache/apk/*
 
 # 验证 Chromium 安装
-RUN chromium --version
+RUN chromium-browser --version
 
 # 安装 puppeteer-core 到 JS task runner 环境
 WORKDIR /opt/runners/task-runner-javascript
