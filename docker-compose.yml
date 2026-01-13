@@ -1,0 +1,76 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: n8n_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  n8n:
+    image: ghcr.io/n8n-io/n8n:2.4.0
+    container_name: n8n
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      # 时区
+      TZ: ${TZ:-Asia/Shanghai}
+      GENERIC_TIMEZONE: ${TZ:-Asia/Shanghai}
+      
+      # 数据库
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      
+      # 加密密钥
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      
+      # Task Runners: external 模式
+      N8N_RUNNERS_ENABLED: "true"
+      N8N_RUNNERS_MODE: external
+      N8N_RUNNERS_BROKER_LISTEN_ADDRESS: 0.0.0.0
+      N8N_RUNNERS_AUTH_TOKEN: ${N8N_RUNNERS_AUTH_TOKEN}
+      
+      # 反代（按需修改）
+      # N8N_HOST: ${N8N_HOST}
+      # N8N_PROTOCOL: https
+      # WEBHOOK_URL: ${WEBHOOK_URL}
+      # N8N_EDITOR_BASE_URL: ${N8N_EDITOR_BASE_URL}
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  task-runners:
+    image: ghcr.io/fcki1984/n8n-runners-puppeteer:2.4.0
+    container_name: n8n_runners
+    restart: unless-stopped
+    depends_on:
+      - n8n
+    environment:
+      N8N_RUNNERS_TASK_BROKER_URI: http://n8n:5679
+      N8N_RUNNERS_AUTH_TOKEN: ${N8N_RUNNERS_AUTH_TOKEN}
+      GENERIC_TIMEZONE: ${TZ:-Asia/Shanghai}
+      TZ: ${TZ:-Asia/Shanghai}
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
+    volumes:
+      # allowlist 配置（镜像里已内置，此处可覆盖/自定义）
+      # 如果你用镜像内置的，可以不挂载；如果想自定义就取消注释
+      # - ./n8n-task-runners.json:/etc/n8n-task-runners.json:ro
+
+volumes:
+  n8n_data:
+  postgres_data:
