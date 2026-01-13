@@ -1,0 +1,16 @@
+{
+  "task-runners": [
+    {
+      "runner-type": "javascript",
+      "env-overrides": {
+        "NODE_FUNCTION_ALLOW_BUILTIN": "crypto,path,fs,url,buffer",
+        "NODE_FUNCTION_ALLOW_EXTERNAL": "puppeteer-core",
+        "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium"
+      }
+    },
+    {
+      "runner-type": "python",
+      "env-overrides": {}
+    }
+  ]
+}
