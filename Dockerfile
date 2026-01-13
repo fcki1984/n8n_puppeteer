@@ -13,12 +13,23 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     CHROME_BIN=/usr/bin/chromium-browser \
     CHROMIUM_FLAGS="--no-sandbox --disable-dev-shm-usage"
 
-# 第一步：恢复 apk-tools（n8n 2.x 镜像中被移除了）
-# 注意：Alpine 版本和 apk-tools 版本需要匹配基础镜像
-RUN wget -q https://dl-cdn.alpinelinux.org/alpine/v3.21/main/x86_64/apk-tools-static-2.14.6-r2.apk -O /tmp/apk-tools.apk && \
-    tar -xzf /tmp/apk-tools.apk -C /tmp && \
-    /tmp/sbin/apk.static add --no-cache apk-tools && \
-    rm -rf /tmp/apk-tools.apk /tmp/sbin
+# 第一步：检测 Alpine 版本并恢复 apk-tools
+# 动态获取版本，避免硬编码导致 404
+RUN ALPINE_VERSION=$(cat /etc/alpine-release | cut -d'.' -f1,2) && \
+    echo "Detected Alpine version: ${ALPINE_VERSION}" && \
+    # 获取 apk-tools-static 包列表页面，提取最新版本
+    ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then ARCH="x86_64"; fi && \
+    APK_TOOLS_URL="https://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/main/${ARCH}/" && \
+    echo "Fetching apk-tools-static from: ${APK_TOOLS_URL}" && \
+    # 下载 apk-tools-static
+    APK_STATIC_PKG=$(wget -qO- "${APK_TOOLS_URL}" | grep -o 'apk-tools-static-[^"]*\.apk' | head -1) && \
+    echo "Found package: ${APK_STATIC_PKG}" && \
+    wget -q "${APK_TOOLS_URL}${APK_STATIC_PKG}" -O /tmp/apk-tools-static.apk && \
+    # 解压并安装
+    tar -xzf /tmp/apk-tools-static.apk -C /tmp && \
+    /tmp/sbin/apk.static add --no-cache --allow-untrusted apk-tools && \
+    rm -rf /tmp/apk-tools-static.apk /tmp/sbin /tmp/usr
 
 # 第二步：安装 Chromium 及完整依赖
 RUN apk update && apk add --no-cache \
