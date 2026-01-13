@@ -5,7 +5,7 @@
       "env-overrides": {
         "NODE_FUNCTION_ALLOW_BUILTIN": "crypto,path,fs,url,buffer",
         "NODE_FUNCTION_ALLOW_EXTERNAL": "puppeteer-core",
-        "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium"
+        "PUPPETEER_EXECUTABLE_PATH": "/usr/bin/chromium-browser"
       }
     },
     {
