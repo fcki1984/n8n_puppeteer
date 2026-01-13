@@ -65,7 +65,8 @@ services:
       N8N_RUNNERS_AUTH_TOKEN: ${N8N_RUNNERS_AUTH_TOKEN}
       GENERIC_TIMEZONE: ${TZ:-Asia/Shanghai}
       TZ: ${TZ:-Asia/Shanghai}
-      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
+      # Alpine 的 Chromium 路径
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
     volumes:
       # allowlist 配置（镜像里已内置，此处可覆盖/自定义）
       # 如果你用镜像内置的，可以不挂载；如果想自定义就取消注释
